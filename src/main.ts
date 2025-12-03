@@ -14,7 +14,7 @@ async function bootstrap() {
   );
 
   app.enableCors();
-  await app.listen(3000);
-  console.log('Server running on http://localhost:3000');
+  await app.listen(3001);
+  console.log('Server running on http://localhost:3001');
 }
 bootstrap();
