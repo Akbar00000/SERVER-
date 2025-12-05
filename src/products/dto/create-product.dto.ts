@@ -19,6 +19,6 @@ export class CreateProductDto {
   @IsArray()
   tags?: string[];
 
-  @IsUUID()
+ @IsString()
   categoryId: string;
 }

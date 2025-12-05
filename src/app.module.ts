@@ -7,8 +7,10 @@ import { BannersModule } from './banners/banners.module';
 import { Product } from './products/entities/product.entity';
 import { Category } from './categories/entities/category.entity';
 import { Banner } from './banners/entities/banner.entity';
+import { DetailsModule } from './products/details/details.module';
+import { ProductDetails } from './products/entities/product-details.entity';
 
-@Module({
+@Module({ 
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
@@ -18,12 +20,13 @@ import { Banner } from './banners/entities/banner.entity';
       username: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASS || '198019572010',
       database: process.env.DB_NAME || 'mobile_store',
-      entities: [Product, Category, Banner],
+      entities: [Product, Category, Banner, ProductDetails],
       synchronize: true,
     }),
     ProductsModule,
     CategoriesModule,
     BannersModule,
+    DetailsModule,
   ],
 })
 export class AppModule {}

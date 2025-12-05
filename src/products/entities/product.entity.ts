@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
 import { Category } from '../../categories/entities/category.entity';
 import { IsString, IsOptional, IsNumber, IsArray } from 'class-validator';
+import { ProductDetails } from './product-details.entity';
 
 @Entity()
 export class Product {
@@ -33,4 +34,11 @@ export class Product {
   @ManyToOne(() => Category, (category) => category.products, { eager: true })
   @JoinColumn()
   category: Category;
+
+  @OneToOne(() => ProductDetails, details => details.product)
+  details: ProductDetails;
+
+
 }
+
+
