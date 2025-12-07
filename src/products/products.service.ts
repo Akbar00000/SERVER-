@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
 import { ProductDetails } from './entities/product-details.entity';
 import { Category } from '../categories/entities/category.entity';
+import { Review } from '../reviews/entities/review.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
@@ -18,7 +19,19 @@ export class ProductService {
 
     @InjectRepository(Category)
     private categoryRepo: Repository<Category>,
+
+    @InjectRepository(Review)
+    private reviewRepo: Repository<Review>,
   ) {}
+
+  private async getProductEntityById(id: string): Promise<Product> {
+    const product = await this.productRepo.findOne({
+      where: { id },
+      relations: ['category', 'details'],
+    });
+    if (!product) throw new NotFoundException('Product not found');
+    return product;
+  }
 
   async create(dto: CreateProductDto) {
     const category = await this.categoryRepo.findOne({ where: { name: dto.categoryName } });
@@ -40,55 +53,78 @@ export class ProductService {
         specs: dto.details.specs || {},
         description: dto.details.description || '',
       });
-      // связываем details с продуктом
       product.details = details;
-    }
-
-    // сохраняем сначала details, если есть
-    if (product.details) {
-      await this.detailsRepo.save(product.details);
+      await this.detailsRepo.save(details);
     }
 
     return this.productRepo.save(product);
   }
 
   async findAll() {
-    const products = await this.productRepo.find({ relations: ['category'] });
-    return products.map((p) => ({
-      id: p.id,
-      title: p.title,
-      price: p.price,
-      description: p.description,
-      image: p.image,
-      tags: p.tags,
-      categoryName: p.category?.name,
-    }));
+    const products = await this.productRepo.find({ relations: ['category', 'details'] });
+
+    const result = await Promise.all(
+      products.map(async (p) => {
+        const reviews = await this.reviewRepo.find({ where: { product: { id: p.id } } });
+        const average = reviews.length
+          ? reviews.reduce((sum, r) => sum + r.score, 0) / reviews.length
+          : null;
+
+        return {
+          id: p.id,
+          title: p.title,
+          description: p.description,
+          price: p.price,
+          image: p.image,
+          tags: p.tags,
+          categoryName: p.category?.name,
+      
+          reviews: reviews.map((r) => ({ score: r.score, comment: r.comment })),
+          averageRating: average ? +average.toFixed(2) : null,
+        };
+      }),
+    );
+
+    return result;
   }
 
   async findOne(id: string) {
-    const product = await this.productRepo.findOne({ where: { id }, relations: ['category', 'details'] });
-    if (!product) throw new NotFoundException('Product not found');
-    return product;
+    const product = await this.getProductEntityById(id);
+
+    const reviews = await this.reviewRepo.find({ where: { product: { id: product.id } } });
+    const average = reviews.length
+      ? reviews.reduce((sum, r) => sum + r.score, 0) / reviews.length
+      : null;
+
+    return {
+      id: product.id,
+      title: product.title,
+      description: product.description,
+      price: product.price,
+      image: product.image,
+      tags: product.tags,
+      categoryName: product.category?.name,
+      details: product.details,
+      reviews: reviews.map((r) => ({ score: r.score, comment: r.comment })),
+      averageRating: average ? +average.toFixed(2) : null,
+    };
   }
 
   async update(id: string, dto: UpdateProductDto) {
-    const product = await this.findOne(id);
+    const product = await this.getProductEntityById(id);
 
-    // CATEGORY
     if (dto.categoryName) {
       const category = await this.categoryRepo.findOne({ where: { name: dto.categoryName } });
       if (!category) throw new NotFoundException('Category not found');
       product.category = category;
     }
 
-    // BASE FIELDS
     if (dto.title !== undefined) product.title = dto.title;
     if (dto.description !== undefined) product.description = dto.description;
     if (dto.price !== undefined) product.price = dto.price;
     if (dto.image !== undefined) product.image = dto.image;
     if (dto.tags !== undefined) product.tags = dto.tags;
 
-    // DETAILS
     if (dto.details) {
       if (!product.details) {
         const newDetails = this.detailsRepo.create({
@@ -100,7 +136,6 @@ export class ProductService {
         product.details = newDetails;
         await this.detailsRepo.save(newDetails);
       } else {
-        // обновляем существующие details
         if (dto.details.colors !== undefined) product.details.colors = dto.details.colors;
         if (dto.details.storageOptions !== undefined) product.details.storageOptions = dto.details.storageOptions;
         if (dto.details.specs !== undefined) product.details.specs = dto.details.specs;
@@ -113,12 +148,9 @@ export class ProductService {
   }
 
   async remove(id: string) {
-    const product = await this.findOne(id);
-    if (!product) throw new NotFoundException('Product not found');
+    const product = await this.getProductEntityById(id);
 
-    if (product.details) {
-      await this.detailsRepo.remove(product.details);
-    }
+    if (product.details) await this.detailsRepo.remove(product.details);
 
     return this.productRepo.remove(product);
   }

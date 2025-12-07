@@ -8,6 +8,8 @@ import { Product } from './products/entities/product.entity';
 import { Category } from './categories/entities/category.entity';
 import { Banner } from './banners/entities/banner.entity';
 import { ProductDetails } from './products/entities/product-details.entity';
+import { ReviewsModule } from './reviews/reviews.module';
+import { Review } from './reviews/entities/review.entity';
 
 @Module({
   imports: [
@@ -19,12 +21,13 @@ import { ProductDetails } from './products/entities/product-details.entity';
       username: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASS || '198019572010',
       database: process.env.DB_NAME || 'mobile_store',
-      entities: [Product, Category, Banner, ProductDetails],
+      entities: [Product, Category, Banner, ProductDetails, Review],
       synchronize: true,
     }),
     ProductsModule,
     CategoriesModule,
     BannersModule,
+    ReviewsModule,
   ],
 })
 export class AppModule {}
