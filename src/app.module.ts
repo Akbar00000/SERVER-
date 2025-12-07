@@ -7,10 +7,9 @@ import { BannersModule } from './banners/banners.module';
 import { Product } from './products/entities/product.entity';
 import { Category } from './categories/entities/category.entity';
 import { Banner } from './banners/entities/banner.entity';
-import { DetailsModule } from './products/details/details.module';
 import { ProductDetails } from './products/entities/product-details.entity';
 
-@Module({ 
+@Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
@@ -26,7 +25,6 @@ import { ProductDetails } from './products/entities/product-details.entity';
     ProductsModule,
     CategoriesModule,
     BannersModule,
-    DetailsModule,
   ],
 })
 export class AppModule {}

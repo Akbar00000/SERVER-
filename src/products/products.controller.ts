@@ -1,4 +1,3 @@
-
 import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
 import { ProductService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -32,6 +31,4 @@ export class ProductController {
   remove(@Param('id') id: string) {
     return this.productService.remove(id);
   }
-
-  
 }

@@ -1,25 +1,24 @@
-    
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 import { Product } from './product.entity';
 
 @Entity()
 export class ProductDetails {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @OneToOne(() => Product, { onDelete: 'CASCADE' })
-  @JoinColumn()
-  product: Product;
-
-  @Column("json", { nullable: true })
+  @Column('simple-array', { nullable: true })
   colors: string[];
 
-  @Column("json", { nullable: true })
+  @Column('simple-array', { nullable: true })
   storageOptions: string[];
 
-  @Column("json", { nullable: true })
+  @Column('json', { nullable: true })
   specs: any;
 
-  @Column("text", { nullable: true })
+  @Column('text', { nullable: true })
   description: string;
+
+  @OneToOne(() => Product, product => product.details, { onDelete: 'CASCADE' })
+  @JoinColumn()
+  product: Product;
 }
