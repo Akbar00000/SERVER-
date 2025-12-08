@@ -5,7 +5,7 @@ import { BaseExceptionFilter } from '@nestjs/core';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -14,7 +14,6 @@ async function bootstrap() {
     }),
   );
 
- 
   app.useGlobalFilters(new class extends BaseExceptionFilter {
     catch(exception: any, host: ArgumentsHost) {
       console.error('Caught exception:', exception);
@@ -26,4 +25,6 @@ async function bootstrap() {
   await app.listen(3001);
   console.log('Server running on http://localhost:3001');
 }
-bootstrap();
+
+
+bootstrap().catch(err => console.error(err));
