@@ -1,43 +1,40 @@
-import { IsOptional, IsString, IsNumber, IsArray, IsIn } from 'class-validator';
+import { IsOptional, IsString, IsArray } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class FilterProductsDto {
-  @IsOptional()
-  @IsString()
-  search?: string;               
-
-  @IsOptional()
-  @IsNumber()
-  minPrice?: number;
-
-  @IsOptional()
-  @IsNumber()
-  maxPrice?: number;
-
+  @ApiPropertyOptional({
+    example: "black",
+    description: "Filter by available colors",
+    type: [String]
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  tags?: string[];               
+  colors?: string[];
 
-  @IsOptional()
-  @IsString()
-  categoryName?: string;         
-
-  
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  colors?: string[];             
-
+  @ApiPropertyOptional({
+    example: ["64GB", "128GB"],
+    description: "Filter by storage options",
+    type: [String]
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  storageOptions?: string[];     
+  storageOptions?: string[];
 
+  @ApiPropertyOptional({
+    example: "",
+    description: "Filter by specific specification key"
+  })
   @IsOptional()
   @IsString()
-  specsKey?: string;             
+  specsKey?: string;
 
+  @ApiPropertyOptional({
+    example: "",
+    description: "Filter by specific specification value"
+  })
   @IsOptional()
   @IsString()
-  specsValue?: string;           
+  specsValue?: string;
 }

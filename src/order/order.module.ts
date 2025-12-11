@@ -4,13 +4,13 @@ import { Order } from './entities/order.entity';
 import { OrderService } from './order.service';
 import { OrderController } from './order.controller';
 import { CartModule } from '../cart/cart.module';
-import { PromoModule } from 'src/promo/promo.module';
+import { PromoModule } from '../promo/promo.module'; 
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Order]),
     CartModule,
-    PromoModule,
+    PromoModule,  
   ],
   controllers: [OrderController],
   providers: [OrderService],
