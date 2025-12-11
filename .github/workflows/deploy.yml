@@ -44,9 +44,13 @@ jobs:
             cd "$APP_DIR"
 
             
+            # Исправленная проверка git
             if [ ! -d .git ]; then
-              echo "❌ Repo not cloned properly. Aborting."
-              exit 1
+              echo "⚠️ Existing folder is not a git repo, recloning..."
+              cd ..
+              rm -rf "$APP_DIR"
+              git clone https://github.com/Akbar00000/SERVER-.git "$APP_DIR" || { echo "Git clone failed"; exit 1; }
+              cd "$APP_DIR"
             fi
 
             
