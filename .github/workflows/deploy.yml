@@ -24,46 +24,31 @@ jobs:
       - name: Deploy to server
         env:
           HOST: ${{ secrets.HOST }}
-          USERNAME: ${{ secrets.USERNAME }}
+          USER: ${{ secrets.USERNAME }}
           APP_DIR: /ci_cd
           PORT: ${{ secrets.PORT }}
         run: |
-          ssh $USERNAME@$HOST << EOF
+          ssh $USER@$HOST << EOF
             set -e
 
-            
-            sudo apt-get update
-            sudo apt-get install -y git
-
-            
             if [ ! -d "$APP_DIR" ]; then
               mkdir -p "$APP_DIR"
-              git clone https://github.com/Akbar00000/SERVER-.git "$APP_DIR" || { echo "Git clone failed"; exit 1; }
+              git clone  https://github.com/Akbar00000/SERVER-.git "$APP_DIR"
             fi
 
             cd "$APP_DIR"
 
-            
-            # Исправленная проверка git
             if [ ! -d .git ]; then
-              echo "⚠️ Existing folder is not a git repo, recloning..."
-              cd ..
-              rm -rf "$APP_DIR"
-              git clone https://github.com/Akbar00000/SERVER-.git "$APP_DIR" || { echo "Git clone failed"; exit 1; }
-              cd "$APP_DIR"
+              echo "❌ Repo not cloned properly. Aborting."
+              exit 1
             fi
 
-            
-            git pull origin main || { echo "Git pull failed"; exit 1; }
+            git pull origin main
 
-            
             echo "PORT=$PORT" > .env
-
-            
             npm install
             npm run build
 
-            
             if pm2 list | grep -q "ci_cd_app"; then
               pm2 restart ci_cd_app
             else
