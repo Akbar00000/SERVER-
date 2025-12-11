@@ -36,7 +36,7 @@ async function bootstrap() {
   // SwaggeR
   const config = new DocumentBuilder()
     .setTitle('My API Documentation')
-    .setDescription('Swagger documentation for my NestJS project')
+    .setDescription('Swagger documentation for my 1 NestJS project')
     .setVersion('1.0')
     .build();
 
