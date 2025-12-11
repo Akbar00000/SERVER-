@@ -57,7 +57,7 @@ async function bootstrap() {
   app.enableCors();
   await app.listen(3001);
   console.log('Server running on http://localhost:3001');
-  console.log('SWAGGER API docs available at http://localhost:3001/api');
+  console.log('SwAGGER API docs available at http://localhost:3001/api');
   
 }
 
