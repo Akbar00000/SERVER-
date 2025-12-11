@@ -28,7 +28,7 @@ jobs:
           APP_DIR: /ci_cd
           PORT: ${{ secrets.PORT }}
         run: |
-          ssh $root@$45.138.158.227 << EOF
+          ssh $USER@$HOST << EOF
             set -e
 
             if [ ! -d "$APP_DIR" ]; then
