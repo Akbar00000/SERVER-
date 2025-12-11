@@ -1,70 +1,44 @@
-name: Deploy to VPS
+- name: Deploy to server
+  env:
+    HOST: ${{ secrets.HOST }}
+    USERNAME: ${{ secrets.USERNAME }}
+    APP_DIR: /ci_cd
+    PORT: ${{ secrets.PORT }}
+  run: |
+    ssh $USERNAME@$HOST << EOF
+      set -e
 
-on:
-  push:
-    branches:
-      - main
+      sudo apt-get update
+      sudo apt-get install -y git
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+      # Если папка не существует, клонируем
+      if [ ! -d "$APP_DIR" ]; then
+        git clone https://github.com/Akbar00000/SERVER-.git "$APP_DIR" || { echo "Git clone failed"; exit 1; }
+      else
+        cd "$APP_DIR"
+        # Если это не git-репозиторий — удаляем и клонируем заново
+        if [ ! -d .git ]; then
+          echo "⚠️ Existing folder is not a git repo, recloning..."
+          cd ..
+          rm -rf "$APP_DIR"
+          git clone https://github.com/Akbar00000/SERVER-.git "$APP_DIR" || { echo "Git clone failed"; exit 1; }
+        fi
+      fi
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      cd "$APP_DIR"
 
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
-        shell: bash
+      git pull origin main || { echo "Git pull failed"; exit 1; }
 
-      - name: Deploy to server
-        env:
-          HOST: ${{ secrets.HOST }}
-          USERNAME: ${{ secrets.USERNAME }}
-          APP_DIR: /ci_cd
-          PORT: ${{ secrets.PORT }}
-        run: |
-          ssh $USERNAME@$HOST << EOF
-            set -e
+      echo "PORT=$PORT" > .env
 
-            
-            sudo apt-get update
-            sudo apt-get install -y git
+      npm install
+      npm run build
 
-            
-            if [ ! -d "$APP_DIR" ]; then
-              mkdir -p "$APP_DIR"
-              git clone https://github.com/Akbar00000/SERVER-.git "$APP_DIR" || { echo "Git clone failed"; exit 1; }
-            fi
+      if pm2 list | grep -q "ci_cd_app"; then
+        pm2 restart ci_cd_app
+      else
+        pm2 start dist/main.js --name ci_cd_app
+      fi
 
-            cd "$APP_DIR"
-
-            
-            if [ ! -d .git ]; then
-              echo "❌ Repo not cloned properly. Aborting."
-              exit 1
-            fi
-
-            
-            git pull origin main || { echo "Git pull failed"; exit 1; }
-
-            
-            echo "PORT=$PORT" > .env
-
-            
-            npm install
-            npm run build
-
-            
-            if pm2 list | grep -q "ci_cd_app"; then
-              pm2 restart ci_cd_app
-            else
-              pm2 start dist/main.js --name ci_cd_app
-            fi
-
-            pm2 save
-          EOF
+      pm2 save
+    EOF
