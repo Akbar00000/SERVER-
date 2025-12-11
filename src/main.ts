@@ -58,6 +58,8 @@ async function bootstrap() {
   await app.listen(3001);
   console.log('Server running on http://localhost:3001');
   console.log('Swagger API docs available at http://localhost:3001/api');
+  console.log('Server ip address: http://http://45.138.158.227');
+  
   
 }
 
