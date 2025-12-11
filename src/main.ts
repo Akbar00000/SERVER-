@@ -33,7 +33,7 @@ class AllExceptionsFilter implements ExceptionFilter {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Swagger 
+  // SwaggeR
   const config = new DocumentBuilder()
     .setTitle('My API Documentation')
     .setDescription('Swagger documentation for my NestJS project')
