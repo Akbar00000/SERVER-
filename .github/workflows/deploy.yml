@@ -24,31 +24,42 @@ jobs:
       - name: Deploy to server
         env:
           HOST: ${{ secrets.HOST }}
-          USER: ${{ secrets.USERNAME }}
+          USERNAME: ${{ secrets.USERNAME }}
           APP_DIR: /ci_cd
           PORT: ${{ secrets.PORT }}
         run: |
-          ssh $USER@$HOST << EOF
+          ssh $USERNAME@$HOST << EOF
             set -e
 
+            
+            sudo apt-get update
+            sudo apt-get install -y git
+
+            
             if [ ! -d "$APP_DIR" ]; then
               mkdir -p "$APP_DIR"
-              git clone https://github.com/Akbar00000/SERVER-.git "$APP_DIR"
+              git clone https://github.com/Akbar00000/SERVER-.git "$APP_DIR" || { echo "Git clone failed"; exit 1; }
             fi
 
             cd "$APP_DIR"
 
+            
             if [ ! -d .git ]; then
               echo "❌ Repo not cloned properly. Aborting."
               exit 1
             fi
 
-            git pull origin main
+            
+            git pull origin main || { echo "Git pull failed"; exit 1; }
 
+            
             echo "PORT=$PORT" > .env
+
+            
             npm install
             npm run build
 
+            
             if pm2 list | grep -q "ci_cd_app"; then
               pm2 restart ci_cd_app
             else
@@ -57,5 +68,3 @@ jobs:
 
             pm2 save
           EOF
-
-          
